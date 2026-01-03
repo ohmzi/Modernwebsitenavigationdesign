@@ -8,7 +8,4 @@
   Run `npm i` to install the dependencies.
 
   Run `npm run dev` to start the development server.
-
-
-  https://stain-sorbet-77801285.figma.site/
   

@@ -1,6 +1,7 @@
 import { Navigation } from './components/Navigation';
 import { MobileNavigation } from './components/MobileNavigation';
 import { HeroSection } from './components/HeroSection';
+import { Solution } from './components/Solution';
 
 export default function App() {
   return (
@@ -9,7 +10,8 @@ export default function App() {
       <div className="lg:hidden">
         <MobileNavigation />
       </div>
-      <HeroSection />
+      {/* <HeroSection /> */}
+      <Solution />
     </div>
   );
 }
