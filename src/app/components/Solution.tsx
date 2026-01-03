@@ -1,4 +1,6 @@
 import { Settings2, Zap, Cloud, Shield, Save, RefreshCw, Database, Bell } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Select,
   SelectContent,
@@ -15,6 +17,9 @@ import { Label } from "./ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export function Solution() {
+  const [radarrEnabled, setRadarrEnabled] = useState(true);
+  const [sonarrEnabled, setSonarrEnabled] = useState(false);
+
   return (
     <div className="relative min-h-screen w-full bg-[#0a0a0f] text-white overflow-hidden font-sans">
        {/* Background Image with Purple Overlay */}
@@ -144,35 +149,85 @@ export function Solution() {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-6 p-6 rounded-2xl bg-black/20 border border-white/5">
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-semibold text-white">Radarr</h4>
-                        <Badge className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">Connected</Badge>
+                    {/* Radarr Card */}
+                    <div className={`space-y-0 p-6 rounded-2xl border transition-all duration-300 ${radarrEnabled ? 'bg-black/20 border-white/5' : 'bg-black/10 border-white/5 opacity-75'}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-white">Radarr</h4>
+                          <Badge className={`${radarrEnabled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-gray-400'} transition-colors`}>
+                            {radarrEnabled ? 'Active' : 'Disabled'}
+                          </Badge>
+                        </div>
+                        <Switch 
+                          checked={radarrEnabled} 
+                          onCheckedChange={setRadarrEnabled}
+                          className="data-[state=checked]:bg-emerald-500" 
+                        />
                       </div>
-                      <div className="space-y-3">
-                        <Label className="text-gray-400 text-xs">API Key</Label>
-                        <Input type="password" value="••••••••••••••••••••" className="bg-black/40 border-white/10 text-gray-400 font-mono text-sm" readOnly />
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="text-gray-400 text-xs">Host</Label>
-                        <Input value="192.168.1.5:7878" className="bg-black/40 border-white/10 text-gray-400 font-mono text-sm" readOnly />
-                      </div>
+                      
+                      <AnimatePresence initial={false}>
+                        {radarrEnabled && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-6 space-y-6">
+                              <div className="space-y-3">
+                                <Label className="text-gray-400 text-xs">API Key</Label>
+                                <Input type="password" value="••••••••••••••••••••" className="bg-black/40 border-white/10 text-gray-400 font-mono text-sm" readOnly />
+                              </div>
+                              <div className="space-y-3">
+                                <Label className="text-gray-400 text-xs">Host</Label>
+                                <Input value="192.168.1.5:7878" className="bg-black/40 border-white/10 text-gray-400 font-mono text-sm" readOnly />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
-                    <div className="space-y-6 p-6 rounded-2xl bg-black/20 border border-white/5">
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-semibold text-white">Sonarr</h4>
-                        <Badge className="bg-red-500/20 text-red-400 hover:bg-red-500/30">Disconnected</Badge>
+                    {/* Sonarr Card */}
+                    <div className={`space-y-0 p-6 rounded-2xl border transition-all duration-300 ${sonarrEnabled ? 'bg-black/20 border-white/5' : 'bg-black/10 border-white/5 opacity-75'}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-white">Sonarr</h4>
+                          <Badge className={`${sonarrEnabled ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-gray-400'} transition-colors`}>
+                            {sonarrEnabled ? 'Active' : 'Disabled'}
+                          </Badge>
+                        </div>
+                        <Switch 
+                          checked={sonarrEnabled} 
+                          onCheckedChange={setSonarrEnabled}
+                          className="data-[state=checked]:bg-blue-500" 
+                        />
                       </div>
-                      <div className="space-y-3">
-                        <Label className="text-gray-400 text-xs">API Key</Label>
-                         <Input placeholder="Enter API Key" className="bg-black/40 border-white/10 text-white font-mono text-sm focus-visible:ring-[#facc15]" />
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="text-gray-400 text-xs">Host</Label>
-                        <Input placeholder="http://localhost:8989" className="bg-black/40 border-white/10 text-white font-mono text-sm focus-visible:ring-[#facc15]" />
-                      </div>
-                      <Button className="w-full bg-white/10 hover:bg-white/20 text-white">Test Connection</Button>
+
+                      <AnimatePresence initial={false}>
+                        {sonarrEnabled && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-6 space-y-6">
+                              <div className="space-y-3">
+                                <Label className="text-gray-400 text-xs">API Key</Label>
+                                <Input placeholder="Enter API Key" className="bg-black/40 border-white/10 text-white font-mono text-sm focus-visible:ring-[#facc15]" />
+                              </div>
+                              <div className="space-y-3">
+                                <Label className="text-gray-400 text-xs">Host</Label>
+                                <Input placeholder="http://localhost:8989" className="bg-black/40 border-white/10 text-white font-mono text-sm focus-visible:ring-[#facc15]" />
+                              </div>
+                              <Button className="w-full bg-white/10 hover:bg-white/20 text-white">Test Connection</Button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
               </div>
