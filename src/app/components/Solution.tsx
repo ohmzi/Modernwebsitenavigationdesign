@@ -1,9 +1,13 @@
-import { Search, HelpCircle, Play, Terminal, RefreshCw, MonitorPlay, Zap, ArrowRight, Layout, CheckCircle2, Clock, RotateCw, Sparkles, Command } from 'lucide-react';
+import { Search, HelpCircle, Play, Terminal, RefreshCw, MonitorPlay, Zap, ArrowRight, Layout, CheckCircle2, Clock, RotateCw, Sparkles, Command, CalendarDays, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { cn } from "./ui/utils";
 import { motion, AnimatePresence } from "motion/react";
+
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { AnalogTimePicker } from "./AnalogTimePicker";
 
 interface JobCardProps {
   title: string;
@@ -16,30 +20,40 @@ interface JobCardProps {
 function JobCard({ title, description, icon, defaultEnabled = false, color = "text-yellow-400" }: JobCardProps) {
   const [enabled, setEnabled] = useState(defaultEnabled);
   const [isRunning, setIsRunning] = useState(false);
+  const [frequency, setFrequency] = useState('daily');
+  const [time, setTime] = useState("03:00");
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
 
   const handleRun = () => {
     setIsRunning(true);
     setTimeout(() => setIsRunning(false), 2000);
   };
 
+  const formatTimeDisplay = (timeStr: string) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
+
   return (
     <motion.div 
-      whileHover={{ scale: 1.01, y: -2 }}
-      className="group relative overflow-hidden rounded-[32px] bg-[#1a1625]/60 backdrop-blur-xl border border-white/5 p-2 transition-all duration-300 hover:bg-[#1a1625]/80 hover:shadow-2xl hover:shadow-purple-500/10"
+      layout
+      className="group relative overflow-hidden rounded-[32px] bg-[#1a1625]/60 backdrop-blur-xl border border-white/5 transition-all duration-300 hover:bg-[#1a1625]/80 hover:shadow-2xl hover:shadow-purple-500/10"
     >
       <div className="absolute top-0 right-0 p-32 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-3xl rounded-full pointer-events-none" />
       
       <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center relative z-10">
         {/* Icon Box */}
-        <div className={`w-16 h-16 rounded-2xl bg-[#0F0B15] border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500 ease-spring ${color}`}>
+        <div className={`w-16 h-16 rounded-2xl bg-[#0F0B15] border border-white/10 flex items-center justify-center shadow-inner shrink-0 ${color}`}>
           {icon}
         </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2 min-w-0">
           <div className="flex items-center gap-3">
-            <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
+            <h3 className="text-xl font-bold text-white tracking-tight truncate">{title}</h3>
             {enabled && (
-               <Badge className="bg-emerald-500/20 text-emerald-400 border-0 px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold animate-in fade-in zoom-in duration-300">
+               <Badge className="bg-emerald-500/20 text-emerald-400 border-0 px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold animate-in fade-in zoom-in duration-300 shrink-0">
                  Active
                </Badge>
             )}
@@ -49,7 +63,7 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
           </p>
         </div>
 
-        <div className="flex items-center gap-4 self-end md:self-center w-full md:w-auto justify-between md:justify-end">
+        <div className="flex items-center gap-4 self-end md:self-center w-full md:w-auto justify-between md:justify-end shrink-0">
            <div className="flex flex-col items-center gap-2">
              <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Auto-Run</span>
              <Switch 
@@ -102,10 +116,91 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
            </div>
         </div>
       </div>
+
+      {/* Scheduler Drawer */}
+      <AnimatePresence>
+        {enabled && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="overflow-hidden bg-[#0F0B15]/30 border-t border-white/5"
+          >
+            <div className="p-6 md:p-8 pt-0">
+               <div className="p-6 rounded-2xl bg-[#0F0B15]/50 border border-white/5 flex flex-col md:flex-row gap-8 md:items-center justify-between">
+                  {/* Frequency Selector */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                      <CalendarDays className="w-3 h-3" />
+                      Repeat
+                    </label>
+                    <div className="flex bg-[#1a1625] p-1 rounded-xl border border-white/5 w-fit">
+                      {['Daily', 'Weekly', 'Monthly'].map((freq) => (
+                        <button
+                          key={freq}
+                          onClick={() => setFrequency(freq.toLowerCase())}
+                          className={cn(
+                            "px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300",
+                            frequency === freq.toLowerCase() 
+                              ? "bg-[#facc15] text-black shadow-lg shadow-yellow-500/20" 
+                              : "text-gray-400 hover:text-white hover:bg-white/5"
+                          )}
+                        >
+                          {freq}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="w-px h-12 bg-white/5 hidden md:block" />
+
+                  {/* Time Picker */}
+                  <div className="space-y-3 flex-1 max-w-xs">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                      <Clock className="w-3 h-3" />
+                      Time
+                    </label>
+                    <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <button className="relative group/input w-full">
+                          <div className="w-full bg-[#1a1625] border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono text-sm text-left focus:outline-none border-transparent ring-offset-0 focus:ring-1 focus:ring-[#facc15]/50 transition-all hover:bg-[#1a1625]/80">
+                            {time}
+                          </div>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/input:text-[#facc15] transition-colors">
+                            <ChevronRight className="w-4 h-4 rotate-90" />
+                          </div>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-[#0F0B15] border-white/10 text-white shadow-2xl" align="center">
+                         <AnalogTimePicker 
+                            value={time} 
+                            onChange={setTime} 
+                            onClose={() => setIsTimePickerOpen(false)} 
+                         />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="w-px h-12 bg-white/5 hidden md:block" />
+
+                  {/* Next Run Info */}
+                  <div className="flex items-center gap-4 bg-white/5 px-5 py-3 rounded-xl border border-white/5">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Next Run</span>
+                      <span className="text-sm font-mono text-emerald-400 font-medium">Tomorrow, {formatTimeDisplay(time)}</span>
+                    </div>
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500/50" />
+                  </div>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Progress/Status Bar Decorative */}
       {enabled && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#facc15]/50 to-transparent opacity-30" />
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#facc15]/50 to-transparent opacity-30 animate-pulse" />
       )}
     </motion.div>
   );
