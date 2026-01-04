@@ -4,7 +4,7 @@ import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { cn } from "./ui/utils";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useAnimation } from "motion/react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { AnalogTimePicker } from "./AnalogTimePicker";
@@ -23,6 +23,22 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
   const [frequency, setFrequency] = useState('daily');
   const [time, setTime] = useState("03:00");
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const controls = useAnimation();
+
+  const handleCardClick = async () => {
+    await controls.start({
+      boxShadow: [
+        "0 0 0px rgba(250, 204, 21, 0)",
+        "0 0 30px rgba(250, 204, 21, 0.5)",
+        "0 0 0px rgba(250, 204, 21, 0)",
+        "0 0 30px rgba(250, 204, 21, 0.5)",
+        "0 0 0px rgba(250, 204, 21, 0)",
+        "0 0 30px rgba(250, 204, 21, 0.5)",
+        "0 0 0px rgba(250, 204, 21, 0)"
+      ],
+      transition: { duration: 1.5, ease: "easeInOut" }
+    });
+  };
 
   const handleRun = () => {
     setIsRunning(true);
@@ -39,7 +55,9 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
   return (
     <motion.div 
       layout
-      className="group relative overflow-hidden rounded-[32px] bg-[#1a1625]/60 backdrop-blur-xl border border-white/5 transition-all duration-300 hover:bg-[#1a1625]/80 hover:shadow-2xl hover:shadow-purple-500/10"
+      animate={controls}
+      onClick={handleCardClick}
+      className="group relative overflow-hidden rounded-[32px] bg-[#1a1625]/60 backdrop-blur-xl border border-white/5 transition-all duration-300 hover:bg-[#1a1625]/80 cursor-pointer"
     >
       <div className="absolute top-0 right-0 p-32 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-3xl rounded-full pointer-events-none" />
       
@@ -69,6 +87,7 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
              <Switch 
               checked={enabled} 
               onCheckedChange={setEnabled}
+              onClick={(e) => e.stopPropagation()}
               className="data-[state=checked]:bg-[#facc15] border-2 border-transparent data-[state=unchecked]:bg-[#2a2438] data-[state=unchecked]:border-white/10"
             />
            </div>
@@ -78,14 +97,15 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
            <div className="flex gap-2">
              <Button 
               size="icon"
-              variant="outline" 
+              variant="outline"
+              onClick={(e) => e.stopPropagation()}
               className="w-12 h-12 rounded-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white transition-all hover:rotate-12"
               title="Dry Run"
             >
               <Terminal className="w-5 h-5" />
             </Button>
             <Button 
-              onClick={handleRun}
+              onClick={(e) => { e.stopPropagation(); handleRun(); }}
               className={`h-12 rounded-full font-bold text-sm shadow-[0_0_20px_rgba(250,204,21,0.2)] transition-all duration-300 overflow-hidden relative ${isRunning ? 'bg-emerald-500 text-white w-12 px-0' : 'bg-[#facc15] text-black w-32 px-6 hover:bg-[#facc15] hover:scale-105'}`}
             >
               <AnimatePresence mode="wait">
@@ -135,7 +155,7 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
                       <CalendarDays className="w-3 h-3" />
                       Repeat
                     </label>
-                    <div className="flex bg-[#1a1625] p-1 rounded-xl border border-white/5 w-fit">
+                    <div className="flex bg-[#1a1625] p-1 rounded-xl border border-white/5 w-fit" onClick={(e) => e.stopPropagation()}>
                       {['Daily', 'Weekly', 'Monthly'].map((freq) => (
                         <button
                           key={freq}
@@ -162,7 +182,7 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
                       Time
                     </label>
                     <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-                      <PopoverTrigger asChild>
+                      <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <button className="relative group/input w-full">
                           <div className="w-full bg-[#1a1625] border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono text-sm text-left focus:outline-none border-transparent ring-offset-0 focus:ring-1 focus:ring-[#facc15]/50 transition-all hover:bg-[#1a1625]/80">
                             {time}
@@ -304,34 +324,6 @@ export function Solution() {
         </div>
 
         <div className="space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            <JobCard 
-              title="Monitor Confirm" 
-              description="Scans your Plex library to verify file existence and syncs state with Sonarr. Can trigger missing episode searches."
-              icon={<MonitorPlay className="w-8 h-8 text-blue-400" />}
-              color="text-blue-400"
-              defaultEnabled={true}
-            />
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <JobCard 
-              title="Metadata Refresher" 
-              description="Aggressively updates Plex collections and metadata for recently watched items to keep recommendations fresh."
-              icon={<RotateCw className="w-8 h-8 text-emerald-400" />}
-              color="text-emerald-400"
-              defaultEnabled={true}
-            />
-          </motion.div>
-
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
