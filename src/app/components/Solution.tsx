@@ -1,4 +1,4 @@
-import { Search, HelpCircle, Play, Terminal, RefreshCw, MonitorPlay, Zap, ArrowRight, Layout, CheckCircle2, Clock, RotateCw, Sparkles, Command, CalendarDays, ChevronRight } from 'lucide-react';
+import { Search, HelpCircle, Play, Terminal, RefreshCw, MonitorPlay, Zap, ArrowRight, Layout, CheckCircle2, Clock, RotateCw, Sparkles, Command, CalendarDays, ChevronRight, Activity, Radio, Signal } from 'lucide-react';
 import { useState } from 'react';
 import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
@@ -8,6 +8,22 @@ import { motion, AnimatePresence, useAnimation } from "motion/react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { AnalogTimePicker } from "./AnalogTimePicker";
+
+const RadarrIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 3L19 12L5 21V3Z" fill="#facc15" stroke="#facc15" strokeWidth="2" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SonarrIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="11" fill="#0ea5e9" />
+    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="white" fillOpacity="0.2" />
+    <circle cx="12" cy="12" r="2" fill="white" />
+    <path d="M16.95 7.05a7 7 0 0 0-9.9 0" stroke="white" strokeWidth="2" strokeLinecap="round" />
+    <path d="M19.07 4.93a10 10 0 0 0-14.14 0" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+  </svg>
+);
 
 interface JobCardProps {
   title: string;
@@ -298,7 +314,7 @@ export function Solution() {
                 </div>
               </div>
               <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter drop-shadow-2xl">
-                Task Runner
+                Engine Room
               </h1>
             </div>
 
@@ -330,13 +346,15 @@ export function Solution() {
             transition={{ duration: 0.4, delay: 0.3 }}
           >
             <JobCard 
-              title="System Diagnostic" 
-              description="Runs a quick no-op cycle to validate the job runner, event loop latency, and database connectivity."
-              icon={<Zap className="w-8 h-8 text-[#facc15]" />}
+              title="Radarr Indexer" 
+              description="Scans for new movie releases, updates metadata, and synchronizes library with the central database."
+              icon={<RadarrIcon className="w-8 h-8" />}
               color="text-[#facc15]"
-              defaultEnabled={false}
+              defaultEnabled={true}
             />
           </motion.div>
+
+
         </div>
 
         <div className="mt-20 flex justify-center">
