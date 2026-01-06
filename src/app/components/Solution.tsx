@@ -1,8 +1,9 @@
-import { Search, HelpCircle, Play, Terminal, RefreshCw, MonitorPlay, Zap, ArrowRight, Layout, CheckCircle2, Clock, RotateCw, Sparkles, Command, CalendarDays, ChevronRight, Activity, Radio, Signal } from 'lucide-react';
-import { useState } from 'react';
+import { Search, HelpCircle, Play, Terminal, RefreshCw, MonitorPlay, Zap, ArrowRight, Layout, CheckCircle2, Clock, RotateCw, Sparkles, Command, CalendarDays, ChevronRight, Activity, Radio, Signal, Film } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
 import { cn } from "./ui/utils";
 import { motion, AnimatePresence, useAnimation } from "motion/react";
 
@@ -242,6 +243,198 @@ function JobCard({ title, description, icon, defaultEnabled = false, color = "te
   );
 }
 
+function FunSlider({ value, onChange, max = 100 }: { value: number, onChange: (val: number) => void, max?: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleMove = (clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    
+    // Apply constraint
+    const constrained = Math.min(percentage, max);
+    onChange(constrained);
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    handleMove(e.clientX);
+  };
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        e.preventDefault();
+        handleMove(e.clientX);
+      }
+    };
+    const onMouseUp = () => setIsDragging(false);
+    
+    if (isDragging) {
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [isDragging]);
+
+  return (
+    <div 
+      ref={containerRef}
+      onMouseDown={onMouseDown}
+      className="relative h-16 w-full rounded-2xl bg-[#0F0B15] cursor-pointer overflow-visible border border-white/10 group select-none touch-none shadow-inner"
+    >
+        {/* Fill Bar (Released) - British Racing Green */}
+        <div 
+            className="absolute top-0 right-0 h-full rounded-r-2xl overflow-hidden shadow-[-4px_0_24px_rgba(0,0,0,0.5)] z-10"
+            style={{ left: `${value}%`, transition: isDragging ? 'none' : 'left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+        >
+             {/* Gradient: Dark (Right) -> Light (Left/Knob) - Darker "British Racing Green" */}
+             <div className="absolute inset-0 bg-gradient-to-l from-[#002010] via-[#064e3b] to-[#16a34a]" />
+             
+             {/* Dreamy clouds/noise texture - matching purple side */}
+             <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+             
+             {/* Pattern */}
+             <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '16px 16px', backgroundPosition: 'right center' }}></div>
+             
+             {/* Inner Highlight */}
+             <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+
+             <div className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#bbf7d0] uppercase tracking-widest pointer-events-none whitespace-nowrap overflow-hidden drop-shadow-md">
+               Released
+             </div>
+        </div>
+
+        {/* Fill Bar (Upcoming) - Dreamy Purple */}
+        <div 
+            className="absolute top-0 left-0 h-full rounded-l-2xl overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-10"
+            style={{ width: `${value}%`, transition: isDragging ? 'none' : 'width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+        >
+             <div className="absolute inset-0 bg-gradient-to-r from-[#240046] via-[#7b2cbf] to-[#c77dff]" />
+             
+             {/* Dreamy clouds/noise texture */}
+             <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+             
+             {/* Pattern */}
+             <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+             
+             {/* Inner Highlight */}
+             <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+
+             <div className="absolute left-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#e0aaff] uppercase tracking-widest pointer-events-none whitespace-nowrap overflow-hidden drop-shadow-md">
+               Upcoming
+             </div>
+        </div>
+
+        {/* The Handle / Separator Line - Hidden in favor of the big 3D knob, or kept subtle */}
+        <div 
+            className="absolute top-0 bottom-0 w-px bg-white/20 z-10"
+            style={{ left: `${value}%`, transform: 'translateX(-50%)', transition: isDragging ? 'none' : 'left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+        />
+
+        {/* 3D Floating Knob */}
+        <div
+            className="absolute top-1/2 -translate-y-1/2 z-30 pointer-events-none perspective-1000"
+            style={{ left: `${value}%`, transform: 'translate(-50%, -50%)', transition: isDragging ? 'none' : 'left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+        >
+            <div className={cn(
+              "relative bg-black/40 backdrop-blur-2xl backdrop-saturate-200 rounded-xl flex flex-col items-center justify-center transition-all duration-200 ease-out border border-white/10",
+              isDragging ? "w-14 h-14 shadow-[0_15px_30px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.1)] scale-110 -translate-y-2" : "w-12 h-12 shadow-[0_8px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] scale-100"
+            )}>
+                {/* Content */}
+                <div className="flex flex-col items-center z-10">
+                   <span className="text-xl font-black text-[#facc15] leading-none tracking-tighter drop-shadow-md">
+                     {Math.round(value)}<span className="text-[10px] align-top opacity-70 ml-0.5">%</span>
+                   </span>
+                </div>
+            </div>
+        </div>
+    </div>
+  );
+}
+
+function RecommendationCard() {
+  const [count, setCount] = useState(5);
+  const [upcomingPercent, setUpcomingPercent] = useState(64);
+
+  // Enforce max 75% for upcoming (at least 25% released)
+  const handleSliderChange = (val: number) => {
+    if (val <= 75) {
+      setUpcomingPercent(val);
+    }
+  };
+
+  const upcomingTarget = Math.round(count * (upcomingPercent / 100));
+  const releasedTarget = count - upcomingTarget;
+
+  return (
+    <div className="group relative overflow-hidden rounded-[32px] bg-[#1a1625]/60 backdrop-blur-xl border border-white/5 p-6 md:p-8 transition-all duration-300 hover:bg-[#1a1625]/80">
+       <div className="absolute top-0 right-0 p-32 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-3xl rounded-full pointer-events-none" />
+
+       {/* Header */}
+       <div className="flex items-center gap-4 mb-6 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-[#0F0B15] border border-white/10 flex items-center justify-center shadow-inner shrink-0 text-purple-400">
+             <Film className="w-6 h-6" />
+          </div>
+          <div>
+             <h3 className="text-xl font-bold text-white tracking-tight">Recommendations</h3>
+          </div>
+       </div>
+
+       <p className="text-gray-400 leading-relaxed font-medium text-sm md:text-base mb-8 max-w-3xl relative z-10">
+         Controls how many recommendations are generated per run, plus how many are <span className="text-white font-bold">upcoming</span> vs already released. Released is always at least 25%.
+       </p>
+
+       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-2 relative z-10">
+          {/* Count Input */}
+          <div className="md:col-span-4 space-y-3">
+             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Recommendation Count</label>
+             <div className="relative">
+               <Input 
+                 type="number" 
+                 value={count} 
+                 onChange={(e) => setCount(Math.max(1, parseInt(e.target.value) || 0))}
+                 className="bg-[#1a1625] border-white/10 h-12 text-lg font-mono text-white focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50"
+               />
+             </div>
+             <p className="text-xs text-gray-500 leading-relaxed pt-2">
+               Used by Immaculate Taste + Based on your recently watched movie.
+             </p>
+          </div>
+
+          {/* Slider Section */}
+          <div className="md:col-span-8 space-y-6">
+             <div className="flex justify-between items-end">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Distribution Split</label>
+             </div>
+             
+             <div className="py-2">
+                <FunSlider 
+                  value={upcomingPercent} 
+                  max={75} 
+                  onChange={handleSliderChange}
+                />
+             </div>
+
+             <div className="flex gap-3 pt-1">
+                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-0 h-8 px-3 rounded-lg transition-all duration-300">
+                   Released target: {releasedTarget}
+                </Badge>
+                <Badge variant="secondary" className="bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border-0 h-8 px-3 rounded-lg transition-all duration-300">
+                   Upcoming target: {upcomingTarget}
+                </Badge>
+             </div>
+          </div>
+       </div>
+    </div>
+  );
+}
+
 export function Solution() {
   return (
     <div className="relative min-h-screen w-full bg-[#0F0B15] text-white font-sans selection:bg-[#facc15] selection:text-black overflow-hidden">
@@ -352,6 +545,14 @@ export function Solution() {
               color="text-[#facc15]"
               defaultEnabled={true}
             />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
+            <RecommendationCard />
           </motion.div>
 
 
